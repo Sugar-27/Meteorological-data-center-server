@@ -183,7 +183,12 @@ bool creatSurfFile(const char* outpath, const char* datafmt) {
     // 写入第一行标题
     if (strcmp(datafmt, "csv") == 0) {
         file.Fprintf("站点代码,数据时间,气温,气压,相对湿度,风向,风速,降雨量,能见度\n");
+    } else if (strcmp(datafmt, "xml") == 0) {
+        file.Fprintf("<data>\n");
+    } else if (strcmp(datafmt, "json") == 0) {
+        file.Fprintf(R"({"data":[)");
     }
+    
     // 遍历存放观测数据的vsurfdata容器
     for (int i = 0; i < vsurfdata.size(); ++i) {
         // 写入一条记录
@@ -194,7 +199,34 @@ bool creatSurfFile(const char* outpath, const char* datafmt) {
                          vsurfdata[i].u, vsurfdata[i].wd,
                          vsurfdata[i].wf / 10.0, vsurfdata[i].r / 10.0,
                          vsurfdata[i].vis / 10.0);
-        }
+        } else if (strcmp(datafmt, "xml") == 0) {
+            file.Fprintf(
+                "<obtid>%s</obtid><ddatetime>%s</ddatetime><t>%.1f</t><p>%.1f</p>"
+                "<u>%d</u><wd>%d</wd><wf>%.1f</wf><r>%.1f</r><vis>%.1f</vis><endl/>\n",
+                vsurfdata[i].obtid, vsurfdata[i].dateTime,
+                vsurfdata[i].t / 10.0, vsurfdata[i].p / 10.0, vsurfdata[i].u,
+                vsurfdata[i].wd, vsurfdata[i].wf / 10.0, vsurfdata[i].r / 10.0,
+                vsurfdata[i].vis / 10.0);
+        } else if (strcmp(datafmt, "json") == 0) {
+            file.Fprintf(
+                "{\"obtid\":\"%s\",\"ddatetime\":\"%s\",\"t\":\"%.1f\",\"p\":"
+                "\"%.1f\","
+                "\"u\":\"%d\",\"wd\":\"%d\",\"wf\":\"%.1f\",\"r\":\"%.1f\","
+                "\"vis\":\"%.1f\"}",
+                vsurfdata[i].obtid, vsurfdata[i].dateTime, vsurfdata[i].t / 10.0,
+                vsurfdata[i].p / 10.0, vsurfdata[i].u, vsurfdata[i].wd,
+                vsurfdata[i].wf / 10.0, vsurfdata[i].r / 10.0,
+                vsurfdata[i].vis / 10.0);
+            if (i != vsurfdata.size() - 1) {
+                file.Fprintf(",");
+            }
+        } 
+    }
+
+    if (strcmp(datafmt, "xml") == 0) {
+        file.Fprintf("</data>\n");
+    } else if (strcmp(datafmt, "json") == 0) {
+        file.Fprintf("]}\n");
     }
 
     // 关闭文件
