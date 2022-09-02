@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
     // outpath: 生成的测试数据存放目录
     // logfile: 生成的日志
     if (argc != 5) {
-        printf("Using: ./crtsurfdata1 inifile outpath logfile\n");
+        printf("Using: ./crtsurfdata inifile outpath logfile\n");
         printf(
             "Example:/home/sugar/project/DataCenter/idc/bin/crtsurfdata "
             "/home/sugar/project/DataCenter/idc/ini/stcode.ini "
@@ -91,12 +91,15 @@ int main(int argc, char* argv[]) {
     // 打开程序的日志文件
     if (strstr(argv[4], "json") != 0) {
         creatSurfFile(argv[2], "json");
+        logFile.Write("生成json数据\n");
     }
     if (strstr(argv[4], "xml") != 0) {
         creatSurfFile(argv[2], "xml");
+        logFile.Write("生成xml数据\n");
     }
     if (strstr(argv[4], "csv") != 0) {
         creatSurfFile(argv[2], "csv");
+        logFile.Write("生成csv数据\n");
     }
 
     logFile.Write("crtsurfdata 运行结束\n");
