@@ -97,3 +97,13 @@
 2022-09-03 01:34:55 生成数据文件/home/sugar/project/DataCenter/tmp/surfdata/SURF_ZH_20220903013455_548843.csv成功，数据时间20220903013455，记录数839
 2022-09-03 01:34:55 生成csv数据
 2022-09-03 01:34:55 crtsurfdata 运行结束
+2022-09-03 23:24:02 crtsurfdata 开始运行
+2022-09-03 23:24:05 程序退出，sig=2
+2022-09-04 00:44:04 crtsurfdata 开始运行
+2022-09-04 00:44:14 生成数据文件/home/sugar/project/DataCenter/tmp/surfdata/SURF_ZH_20220710136000_803223.json成功，数据时间20220710136000，记录数839
+2022-09-04 00:44:14 生成json数据
+2022-09-04 00:44:24 生成数据文件/home/sugar/project/DataCenter/tmp/surfdata/SURF_ZH_20220710136000_803223.xml成功，数据时间20220710136000，记录数839
+2022-09-04 00:44:24 生成xml数据
+2022-09-04 00:44:34 生成数据文件/home/sugar/project/DataCenter/tmp/surfdata/SURF_ZH_20220710136000_803223.csv成功，数据时间20220710136000，记录数839
+2022-09-04 00:44:34 生成csv数据
+2022-09-04 00:44:34 crtsurfdata 运行结束
