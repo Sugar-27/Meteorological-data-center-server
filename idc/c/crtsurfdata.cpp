@@ -1,6 +1,10 @@
 /**
  * @file crtsurfdata1.cpp
  * @brief 本程序用于生成全国气象站点观测的分钟数据
+ *        1. 增加生成历史数据文件的功能，为压缩数据和清理文件模块准备历史数据文件
+ *        2. 增加信号处理函数，处理信号2和信号15
+ *        3. 解决调用exit()函数退出时局部对象没有执行析构函数的问题
+ *        4. 把心跳信息写入共享内存
  * @author Sugar (hzzou@dhu.edu.cn)
  * @date 2022-08-28
  */
@@ -8,7 +12,15 @@
 #include "_public.h"
 
 CLogFile logFile(10);
-char strDateTime[21]; // 观测数据的时间
+char strDateTime[21];   // 观测数据的时间
+CFile file;             // file定义为全局变量（因为exit函数不会执行局部变量的析构函数）
+CPActive PActive;       // 进程心跳
+
+void EXIT(int sig) {
+    logFile.Write("程序退出，sig=%d\n", sig);
+    exit(0);
+}
+
 /*
 省   站号  站名 纬度   经度  海拔高度
 安徽,58015,砀山,34.27,116.2,44.2
@@ -55,14 +67,15 @@ int main(int argc, char* argv[]) {
     // inifile: 全国气象站点参数文件
     // outpath: 生成的测试数据存放目录
     // logfile: 生成的日志
-    if (argc != 5) {
-        printf("Using: ./crtsurfdata inifile outpath logfile\n");
+    if ((argc != 5) && (argc != 6)) {
+        printf("Using: ./crtsurfdata inifile outpath logfile [datetime]\n");
         printf(
             "Example:/home/sugar/project/DataCenter/idc/bin/crtsurfdata "
             "/home/sugar/project/DataCenter/idc/ini/stcode.ini "
             "/home/sugar/project/DataCenter/tmp/surfdata " 
             "/home/sugar/project/DataCenter/log/idc/crtsurfdata.log "
-            "xml,json,csv\n\n");
+            "xml,json,csv "
+            "20220903013455\n\n");
 
         printf("inifile 全国气象站点参数文件名。\n");
         printf("outpath 全国气象站点数据文件存放的目录。\n");
@@ -72,17 +85,30 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    if (!logFile.Open(argv[3])) {
+    CloseIOAndSignal(true);
+    signal(SIGINT, EXIT);
+    signal(SIGTERM, EXIT);
+
+    if (!logFile.Open(argv[3], "a+", false)) {
         printf("logFile.Open(%s) failed, please recheck.", argv[3]);
         return -1;
     }
 
+    PActive.AddPInfo(20, "crtsurfdata");
     logFile.Write("crtsurfdata 开始运行\n");
 
     // TODO: @sugar 业务代码
     // 将站点参数文件加载到容器中
     if (!loadSTCode(argv[1])) {
         return -1;  // 加载失败
+    }
+
+    // 获取当前时间作为观测时间
+    memset(strDateTime, 0, sizeof strDateTime);
+    if (argc == 5) {
+        LocalTime(strDateTime, "yyyymmddhh24miss");
+    } else {
+        STRCPY(strDateTime, sizeof(strDateTime), argv[5]);
     }
 
     // 模拟生成全国气象站点分钟观测数据，存放在vsurfdata容器中
@@ -108,7 +134,6 @@ int main(int argc, char* argv[]) {
 }
 
 bool loadSTCode(const char* iniFile) {
-    CFile file;
     if (file.Open(iniFile, "r") == false) {
         // 打开失败，日志记录函数返回
         logFile.Write("file.Open(%s) failed\n", iniFile);
@@ -148,9 +173,6 @@ bool loadSTCode(const char* iniFile) {
 void creatSurfData() {
     // 设置随机数种子
     srand(time(0));
-    // 获取当前时间作为观测时间
-    memset(strDateTime, 0, sizeof strDateTime);
-    LocalTime(strDateTime, "yyyymmddhh24miss");
 
     struct st_surfdata st_surfdata;
     // 遍历气象站点参数容器
@@ -234,6 +256,8 @@ bool creatSurfFile(const char* outpath, const char* datafmt) {
 
     // 关闭文件
     file.CloseAndRename();
+
+    UTime(strFileName, strDateTime);    // 修改文件的时间属性
 
     logFile.Write("生成数据文件%s成功，数据时间%s，记录数%d\n", strFileName, strDateTime, vsurfdata.size());
 
