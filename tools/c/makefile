@@ -7,7 +7,7 @@ PUBCPP = /home/sugar/project/DataCenter/public/_public.cpp
 # 编译参数
 CFLAGS = -g
 
-all: procctl checkproc gzipfiles
+all: procctl checkproc gzipfiles deletefiles
 
 procctl: procctl.cpp
 		  g++ -o procctl procctl.cpp
@@ -26,6 +26,10 @@ checkproc: checkproc.cpp
 gzipfiles: gzipfiles.cpp
 		   g++ $(CFLAGS) -o gzipfiles gzipfiles.cpp $(PUBINCL) $(PUBCPP) -lm -lc
 		   cp gzipfiles ../bin/.
-		   
+
+deletefiles: deletefiles.cpp
+			 g++ $(CFLAGS) -o deletefiles deletefiles.cpp $(PUBINCL) $(PUBCPP) -lm -lc
+			 cp deletefiles ../bin/.
+
 clean: 
-		rm -f procctl test checkproc gzipfiles
+		rm -f procctl test checkproc gzipfiles deletefiles
