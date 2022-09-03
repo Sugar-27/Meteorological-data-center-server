@@ -1,26 +1,33 @@
-#include <stdlib.h>
+// #include <stdlib.h>
+// #include <unistd.h>
+// #include "_public.h"
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 #include <iostream>
-#include <unistd.h>
-#include "_public.h"
+
+struct st_pid {
+    int pid;
+    char name[51];
+};
 
 int main(int argc, char* argv[]) {
-    printf("输入参数数量为：%d\n", argc);
 
-    for (int i = 0; i < argc; ++i) {
-        printf("参数%d为：%s\n", i, argv[i]);
-    }
-    printf("测试程序开始执行\n");
-    CFile file;
-    if (!file.Open("/home/sugar/project/DataCenter/tools/c/testLog.txt", "w")) {
-        // 打开失败，日志记录函数返回
-        printf("打开失败\n");
+    int shmid;
+
+    if ((shmid = shmget(0x5005, sizeof (st_pid), 0640 | IPC_CREAT)) == -1) {
+        printf("shmget failed\n");
         return -1;
     }
-    file.Fprintf("测试开始\n");
-    sleep(5);
-    file.Fprintf("测试结束，历时5秒\n");
-    sleep(2);
-    printf("测试程序执行结束\n");
+
+    st_pid* stpid = nullptr;
+    if ((stpid = (st_pid*)shmat(shmid, nullptr, 0)) == (void*)-1) {
+        printf("shmat failed\n");
+        return -1;
+    }
+
+    stpid->pid = 10010;
+    strcpy(stpid->name, "JOJO");
 
     return 0;
 }

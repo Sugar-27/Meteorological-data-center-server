@@ -7,7 +7,7 @@ PUBCPP = /home/sugar/project/DataCenter/public/_public.cpp
 # 编译参数
 CFLAGS = -g
 
-all: procctl test
+all: procctl checkproc
 
 procctl: procctl.cpp
 		  g++ -o procctl procctl.cpp
@@ -16,6 +16,13 @@ procctl: procctl.cpp
 test: test.cpp
 	  g++ -o test test.cpp $(PUBINCL) $(PUBCPP) -lm -lc
 
+book: book.cpp
+	  g++ $(CFLAGS) -o book book.cpp $(PUBINCL) $(PUBCPP) -lm -lc
+
+checkproc: checkproc.cpp
+		   g++ $(CFLAGS) -o checkproc checkproc.cpp $(PUBINCL) $(PUBCPP) -lm -lc
+
 clean: 
 		rm -f procctl
 		rm -f test
+		rm -f checkproc
