@@ -27,6 +27,9 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
+    // 忽略全部的信号和IO
+    CloseIOAndSignal(true);
+
     // 打开日志文档
     if (!logFIle.Open(argv[1], "a+")) {
         printf("lofFile.Open(%s) failed\n", argv[1]);
@@ -51,7 +54,7 @@ int main(int argc, char* argv[]) {
         // 如果记录的pid == 0，表示是空记录，continue
         if (shm[i].pid == 0) continue;
         // 如果记录的pid != 0，表示是服务程序的心跳记录
-        logFIle.Write("i=%d, pid=%d, pname=%s, timeout=%d, atime=%d\n", i, shm[i].pid, shm[i].pname, shm[i].timeout, shm[i].atime);
+        // logFIle.Write("i=%d, pid=%d, pname=%s, timeout=%d, atime=%d\n", i, shm[i].pid, shm[i].pname, shm[i].timeout, shm[i].atime);
         // 向进程发送信号0，判断它是否还存在，如果不存在，从共享内存中删除该记录
         int iret = kill(shm[i].pid, 0);
         if (iret == -1) {
@@ -75,7 +78,7 @@ int main(int argc, char* argv[]) {
         // 如果进程仍然存在，尝试发送信号9，强制终止进程
         if (iret != -1) {
             kill(shm[i].pid, 9);
-            logFIle.Write("进程pid=%d(%s)非正常终止，使用信号9强制终止\n", shm[i].pid, shm[i].pname);
+            logFIle.Write("进程pid=%d(%s)使用信号9强制终止\n", shm[i].pid, shm[i].pname);
         } else {
             logFIle.Write("进程pid=%d(%s)已经正常终止\n", shm[i].pid, shm[i].pname);
         }
